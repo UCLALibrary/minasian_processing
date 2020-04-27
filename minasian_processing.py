@@ -75,7 +75,8 @@ with open('minasian_digitized_works.csv', 'w') as out:
             if works_dict[item_ark]['Object Type'] == 'Work':
                 if row['Item ARK'] == item_ark:
                     if works_dict[item_ark]['Metadata Only'] == 'No':
-                        writer.writerow(row)
+                        new_row = Merge(row, works_dict[item_ark])
+                        writer.writerow(new_row)
                 else:
                     pass
 
@@ -90,24 +91,26 @@ with open('minasian_metadata_works.csv', 'w') as out:
             if row['Item ARK'] == item_ark:
                 if works_dict[item_ark]['Object Type'] == 'Work':
                     if works_dict[item_ark]['Metadata Only'] == 'Yes':
-                        writer.writerow(row)
+                        new_row = Merge(row, works_dict[item_ark])
+                        writer.writerow(new_row)
             else:
                 pass
+                
 
 #new csv with conceptual works (at childwork level)
-with open('minasian_childWorks_conceptual_works.csv', 'w') as out:
+with open('minasian_childworks_conceptual_works.csv', 'w') as out:
     writer = csv.DictWriter(out, fieldnames=get_headers(dlcs_export))
     writer.writeheader()
     cursor = csv.DictReader(open(dlcs_export),
     delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
     for row in cursor:
         for item_ark in works_dict.keys():
-            if works_dict[item_ark]['Object Type'] == 'ChildWork':
-                if works_dict[item_ark]['Conceptual Work'] == 'Yes':
-                    if row['Item ARK'] == item_ark:
-                        writer.writerow(row)
-            else:
-                pass
+            if works_dict[item_ark]['Conceptual Work'] == 'Yes':
+                if row['Item ARK'] == item_ark:
+                    new_row = Merge(row, works_dict[item_ark])
+                    writer.writerow(new_row)
+        else:
+            pass
 
 #new csv for each manuscript's pages
 for item_ark in works_dict.keys():
@@ -121,6 +124,7 @@ for item_ark in works_dict.keys():
                 delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
                 for row in cursor:
                     if row['Parent ARK'] == item_ark and row['Item Sequence'] != '':
-                        writer.writerow(row)
+                        new_row = Merge(row, works_dict[item_ark])
+                        writer.writerow(new_row)
                     else:
                         pass
