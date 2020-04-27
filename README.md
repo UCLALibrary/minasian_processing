@@ -2,9 +2,10 @@
 Contains a script to break the Minasian collection into many csvs with added flags and json data
 
 # Make a directory and clone this repo
-$ mkdir minasian
-$ cd minasian
-$ git clone 
+1. $ mkdir minasian
+2. $ cd minasian
+3. $ git clone https://github.com/UCLALibrary/minasian_processing.git
+4. $ cd minasian_processing
 
 # Unzip the csv (this csv name is hardcoded in the script)
 
