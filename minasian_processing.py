@@ -49,7 +49,6 @@ for row in cursor:
         else:
             works_dict[item_ark]['Conceptual Work'] = 'No'
 
-
 #new csv for original csv plus new flags
 with open('minasian_dlcs_new_columns.csv', 'w') as out:
     writer = csv.DictWriter(out, fieldnames=get_headers(dlcs_export))
@@ -123,8 +122,9 @@ for item_ark in works_dict.keys():
                 cursor = csv.DictReader(open(dlcs_export),
                 delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
                 for row in cursor:
-                    if row['Parent ARK'] == item_ark and row['Item Sequence'] != '':
-                        new_row = Merge(row, works_dict[item_ark])
+                    if row['Parent ARK'] == item_ark and row['Item Sequence'] != '' and row['Object Type'] == 'ChildWork':
+                        childwork_ark = row['Item ARK']
+                        new_row = Merge(row, works_dict[childwork_ark])
                         writer.writerow(new_row)
                     else:
                         pass
