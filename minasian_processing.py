@@ -1,12 +1,15 @@
 import csv
 import json
+import pprint
+
+pp = pprint.PrettyPrinter(indent=4)
 
 #function to get all headers in DLCS export csv and then add three from eureka csv
 def get_headers(file_name):
     with open(file_name, 'r', newline='') as f:
         r = csv.reader(f, delimiter=',')
         headers = next(r)
-        headers.extend(['JSON', 'Metadata Only', 'Conceptual Work'])
+        headers.extend(['Description.tableOfContents','JSON', 'Metadata Only', 'Conceptual Work'])
         return headers
 
 #merges two dictionaries together
@@ -28,6 +31,8 @@ for row in cursor:
     object_type = row['Object Type']
     pagination = row['viewingHint']
     sequence = row['Item Sequence']
+    description = row['Description.abstract']
+    title = row['Title']
 
     works_dict[item_ark] = {
             'Parent ARK': parent_ark,
@@ -42,12 +47,31 @@ for row in cursor:
             works_dict[item_ark]['Metadata Only'] = 'Yes'
         else:
             works_dict[item_ark]['Metadata Only'] = 'No'  
-    #checks if a ChildWork is really a conceptual work            
+    #checks if a ChildWork is really a conceptual work
+    #create a table of contents key and value to later be merged by parent ark            
     if object_type == 'ChildWork':
         if sequence == '':
             works_dict[item_ark]['Conceptual Work'] = 'Yes'
+            if description != '':
+                works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}; {}'.format(title, description)
+            elif description == '':
+                works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}'.format(title)
+
         else:
             works_dict[item_ark]['Conceptual Work'] = 'No'
+
+for item_ark in works_dict.keys():
+    if works_dict[item_ark]['Conceptual Work'] == 'Yes':
+        parent_ark = works_dict[item_ark]['Parent ARK']
+        text_value = works_dict[item_ark]['Description.tableOfContents']
+        if 'Description.tableOfContents' in works_dict[parent_ark]:
+            if text_value != '' and text_value not in works_dict[parent_ark]['Description.tableOfContents']:
+                works_dict[parent_ark]['Description.tableOfContents'] = '{0}|~|{1}'.format(
+                            works_dict[parent_ark]['Description.tableOfContents'],
+                            text_value
+                            )
+        else:
+            works_dict[parent_ark]['Description.tableOfContents'] = text_value
 
 #new csv for original csv plus new flags
 with open('minasian_dlcs_new_columns.csv', 'w') as out:
@@ -62,6 +86,7 @@ with open('minasian_dlcs_new_columns.csv', 'w') as out:
                 writer.writerow(new_row)
             else:
                 pass
+
 
 #new csv for digitized works
 with open('minasian_digitized_works.csv', 'w') as out:
@@ -94,7 +119,7 @@ with open('minasian_metadata_works.csv', 'w') as out:
                         writer.writerow(new_row)
             else:
                 pass
-                
+               
 
 #new csv with conceptual works (at childwork level)
 with open('minasian_childworks_conceptual_works.csv', 'w') as out:
