@@ -1,8 +1,6 @@
 import csv
 import json
-import pprint
 
-pp = pprint.PrettyPrinter(indent=4)
 
 #function to get all headers in DLCS export csv and then add three from eureka csv
 def get_headers(file_name):
@@ -16,7 +14,6 @@ def get_headers(file_name):
 def Merge(dict1, dict2): 
     res = {**dict1, **dict2} 
     return res 
-
 
 dlcs_export = 'minasian_dlcs_export.csv'
 works_dict = {}
@@ -87,7 +84,6 @@ with open('minasian_dlcs_new_columns.csv', 'w') as out:
             else:
                 pass
 
-
 #new csv for digitized works
 with open('minasian_digitized_works.csv', 'w') as out:
     writer = csv.DictWriter(out, fieldnames=get_headers(dlcs_export))
@@ -120,7 +116,6 @@ with open('minasian_metadata_works.csv', 'w') as out:
             else:
                 pass
                
-
 #new csv with conceptual works (at childwork level)
 with open('minasian_childworks_conceptual_works.csv', 'w') as out:
     writer = csv.DictWriter(out, fieldnames=get_headers(dlcs_export))
