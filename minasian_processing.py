@@ -7,7 +7,7 @@ def get_headers(file_name):
     with open(file_name, 'r', newline='') as f:
         r = csv.reader(f, delimiter=',')
         headers = next(r)
-        headers.extend(['Description.tableOfContents','JSON', 'Metadata Only', 'Conceptual Work'])
+        headers.extend(['Description.tableOfContents','JSON', 'Metadata Only', 'Conceptual Work', 'Object Type', 'Item Status'])
         return headers
 
 #merges two dictionaries together
@@ -30,13 +30,15 @@ for row in cursor:
     sequence = row['Item Sequence']
     description = row['Description.abstract']
     title = row['Title']
+    status = row['Item Status']
 
     works_dict[item_ark] = {
             'Parent ARK': parent_ark,
             'Object Type': object_type,
             'JSON': json_data,
             'Conceptual Work' : '',
-            'Metadata Only': ''
+            'Metadata Only': '',
+            'Item Status': status
             }
     #checks if a work is a digitized asset based viewingHint value
     if object_type == 'Work':
@@ -44,18 +46,23 @@ for row in cursor:
             works_dict[item_ark]['Metadata Only'] = 'Yes'
         else:
             works_dict[item_ark]['Metadata Only'] = 'No'  
+
     #checks if a ChildWork is really a conceptual work
     #create a table of contents key and value to later be merged by parent ark            
     if object_type == 'ChildWork':
+        works_dict[item_ark]['Object Type'] = 'Page'
         if sequence == '':
             works_dict[item_ark]['Conceptual Work'] = 'Yes'
             if description != '':
                 works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}; {}'.format(title, description)
             elif description == '':
                 works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}'.format(title)
-
         else:
             works_dict[item_ark]['Conceptual Work'] = 'No'
+
+    #change Needs Review to completed for visibility after Samvera ingest
+    if status == 'Needs Review':
+        works_dict[item_ark]['Item Status'] = 'Completed'
 
 for item_ark in works_dict.keys():
     if works_dict[item_ark]['Conceptual Work'] == 'Yes':
