@@ -7,7 +7,7 @@ def get_headers(file_name):
     with open(file_name, 'r', newline='') as f:
         r = csv.reader(f, delimiter=',')
         headers = next(r)
-        headers.extend(['Description.tableOfContents','JSON', 'Metadata Only', 'Conceptual Work', 'Object Type', 'Item Status'])
+        headers.extend(['Description.tableOfContents','JSON', 'Metadata Only', 'Conceptual Work'])
         return headers
 
 #merges two dictionaries together
@@ -50,15 +50,15 @@ for row in cursor:
     #checks if a ChildWork is really a conceptual work
     #create a table of contents key and value to later be merged by parent ark            
     if object_type == 'ChildWork':
-        works_dict[item_ark]['Object Type'] = 'Page'
         if sequence == '':
             works_dict[item_ark]['Conceptual Work'] = 'Yes'
             if description != '':
                 works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}; {}'.format(title, description)
             elif description == '':
                 works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}'.format(title)
-        else:
+        elif sequence != '':
             works_dict[item_ark]['Conceptual Work'] = 'No'
+            works_dict[item_ark]['Object Type'] = 'Page'
 
     #change Needs Review to completed for visibility after Samvera ingest
     if status == 'Needs Review':
