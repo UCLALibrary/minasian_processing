@@ -31,6 +31,7 @@ for row in cursor:
     description = row['Description.abstract']
     title = row['Title']
     status = row['Item Status']
+    file_name = row['File Name']
 
     works_dict[item_ark] = {
             'Parent ARK': parent_ark,
@@ -50,7 +51,7 @@ for row in cursor:
     #checks if a ChildWork is really a conceptual work
     #create a table of contents key and value to later be merged by parent ark            
     if object_type == 'ChildWork':
-        if sequence == '':
+        if file_name == '':
             works_dict[item_ark]['Conceptual Work'] = 'Yes'
             if description != '':
                 works_dict[item_ark]['Description.tableOfContents'] = 'Title: {}; {}'.format(title, description)
@@ -149,7 +150,7 @@ for item_ark in works_dict.keys():
                 cursor = csv.DictReader(open(dlcs_export),
                 delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
                 for row in cursor:
-                    if row['Parent ARK'] == item_ark and row['Item Sequence'] != '' and row['Object Type'] == 'ChildWork':
+                    if row['Parent ARK'] == item_ark and row['Item Sequence'] != '' and row['Object Type'] == 'ChildWork' and row['File Name'] != '':
                         childwork_ark = row['Item ARK']
                         new_row = Merge(row, works_dict[childwork_ark])
                         writer.writerow(new_row)
